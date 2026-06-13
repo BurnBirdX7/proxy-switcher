@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "ProxySwitcher",
+  "description": "Simple extensions to quickly toggle proxy",
+  "version": "0.1",
+  "icons": {
+    "48": "icons/on-manual.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "proxy-extension@burnbird.me",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "action": {
+    "default_icon": "icons/alert.svg",
+    "default_title": "ProxySwitcher"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "proxy",
+    "alarms"
+  ]
+}
