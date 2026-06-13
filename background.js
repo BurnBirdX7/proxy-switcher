@@ -16,6 +16,15 @@ const PROXY_NAMING = {
 }
 
 /**
+ * @param title {string}
+ * @param iconPath {string}
+ */
+async function setIndication(title, iconPath) {
+    await browser.action.setIcon({path: iconPath});
+    await browser.action.setTitle({title: title});
+}
+
+/**
  * @return {Promise<browser.proxy.ProxyConfig>}
  */
 async function getProxySettings() {
@@ -34,10 +43,7 @@ async function updateIndication() {
     const {proxyType} = await getProxySettings()
 
     let path, title;
-    if (!await browser.extension.isAllowedIncognitoAccess()) {
-        path = "icons/alert.svg";
-        title = "Error: Incognito Access Required";
-    } else if (SUPPORTED_PROXY_TYPES.includes(proxyType)) {
+    if (SUPPORTED_PROXY_TYPES.includes(proxyType)) {
         path = `icons/proxy/${proxyType}.svg`;
         title = `Using: ${PROXY_NAMING[proxyType]}`;
     } else {
@@ -45,10 +51,9 @@ async function updateIndication() {
         title = `Error: Unknown proxy type: ${proxyType}`;
     }
 
-    await browser.action.setIcon({path});
-    await browser.action.setTitle({title});
+    await setIndication(title, path);
 
-    console.log("Icon successfully updated")
+    console.log("Indication successfully updated")
 }
 
 /**
@@ -108,14 +113,36 @@ browser.runtime.onInstalled.addListener(init);
 browser.runtime.onStartup.addListener(init);
 
 async function init() {
+    let incognitoAllowed = await browser.extension.isAllowedIncognitoAccess();
+    if (!incognitoAllowed) {
+        console.error("Can't init - not enough permissions");
+        return setIndication("Error: Incognito Access Required", "icons/alert.svg");
+    }
+
+    // Take control of the config from user
+    let configAsserted = await getProxySettings()
+        .then(setProxySettings)
+        .then(() => {
+            console.log("Asserted config control")
+            return true;
+        })
+        .catch(() => {
+            console.error("Failed to assert config control");
+            return false;
+        });
+    if (!configAsserted) {
+        console.error("Failed to init");
+        return setIndication("Error: Can't control config", "icons/alert.svg");
+    }
+
     // Handle clicks
     browser.action.onClicked.addListener(handleClick);
 
-    // Handle icon actualization
-    await browser.alarms.create(ALARM_NAME, {delayInMinutes: 1});
+    // Handle indicator drift
+    await browser.alarms.create(ALARM_NAME, {delayInMinutes: 2});
     browser.alarms.onAlarm.addListener(updateIndicationOnAlarm);
-    browser.tabs.onActivated.addListener(updateIndication)
-    browser.tabs.onUpdated.addListener(updateIndication)
+    browser.tabs.onActivated.addListener(updateIndication);
+    browser.tabs.onUpdated.addListener(updateIndication);
 
     // Finish
     await updateIndication();
