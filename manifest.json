@@ -4,7 +4,7 @@
   "description": "Simple extensions to quickly toggle proxy",
   "version": "0.1",
   "icons": {
-    "48": "icons/on-manual.svg"
+    "48": "icons/ok.svg"
   },
   "browser_specific_settings": {
     "gecko": {
@@ -13,7 +13,8 @@
         "required": [
           "none"
         ]
-      }
+      },
+      "strict_min_version": "142.0.0"
     }
   },
   "action": {
