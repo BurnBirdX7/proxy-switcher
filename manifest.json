@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ProxySwitcher",
-  "description": "Simple extensions to quickly toggle proxy",
+  "description": "Simple extensions to quickly switch proxy modes",
+  "homepage_url": "https://github.com/BurnBirdX7/proxy-switcher",
   "version": "0.1",
   "icons": {
     "48": "icons/ok.svg"
