@@ -1,5 +1,7 @@
 import { SUPPORTED_PROXY_TYPES, Storage } from '/shared.js';
 
+const CHECKBOX_NAME = 'types-checkbox';
+
 /**
  * @param type {string}
  * @return {HTMLInputElement}
@@ -8,7 +10,7 @@ function createCheckbox(type) {
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.id = `type-${type}`;
-    checkbox.name = 'types';
+    checkbox.name = CHECKBOX_NAME;
     checkbox.value = type;
     checkbox.className = 'proxy-type-checkbox';
     return checkbox;
@@ -19,7 +21,7 @@ function createLabel(type) {
     label.htmlFor = `type-${type}`;
 
     const img = document.createElement('img');
-    img.src = `../icons/proxy/${type}.svg`;
+    img.src = `/icons/proxy/${type}.svg`;
     img.alt = type;
     img.className = 'proxy-icon';
 
@@ -56,13 +58,13 @@ async function constructForm() {
         }
     });
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        const selectedTypes = formData.getAll('types');
-
-        await Storage.setEnabledProxyTypes(selectedTypes);
-        alert('Settings saved successfully!');
+    // Handle checkbox changes
+    container.addEventListener('change', async (event) => {
+        if (event.target.name === CHECKBOX_NAME) {
+            const formData = new FormData(form);
+            const selectedTypes = formData.getAll(CHECKBOX_NAME);
+            await Storage.setEnabledProxyTypes(selectedTypes);
+        }
     });
 }
 
