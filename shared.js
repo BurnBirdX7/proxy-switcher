@@ -38,6 +38,21 @@ export class Storage {
         })
     }
 
+    /**
+     * @returns {Promise<boolean>}
+     */
+    static async getInitialized() {
+        const {init} = await browser.storage.session.get({init: false});
+        return init;
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    static async setInitialized() {
+        return browser.storage.session.set({init: true});
+    }
+
 }
 
 

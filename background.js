@@ -1,6 +1,5 @@
 import {SUPPORTED_PROXY_TYPES, PROXY_NAMING, Storage} from "/shared.js";
 
-
 const ALARM_NAME = "IconSync"
 
 /**
@@ -115,9 +114,6 @@ async function handleClick() {
         .catch(reason => console.error(`Failed to update proxy settings: ${reason}`));
 }
 
-browser.runtime.onInstalled.addListener(init);
-browser.runtime.onStartup.addListener(init);
-
 async function init() {
     let incognitoAllowed = await browser.extension.isAllowedIncognitoAccess();
     if (!incognitoAllowed) {
@@ -153,3 +149,9 @@ async function init() {
     await updateIndication();
     console.log("Init complete");
 }
+
+if (!await Storage.getInitialized()) {
+    await init();
+    await Storage.setInitialized();
+}
+
