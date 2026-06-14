@@ -1,0 +1,13 @@
+{
+  "name": "proxy-switcher",
+  "author": "artemiy.lazarevx7@gmail.com",
+  "type": "module",
+  "devDependencies": {
+    "web-ext": "^10.4.0"
+  },
+  "scripts": {
+    "build": "web-ext build -s src -a artifacts --overwrite-dest",
+    "start": "web-ext run -s src --firefox deved",
+    "lint": "web-ext lint -s src"
+  }
+}
