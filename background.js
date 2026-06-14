@@ -1,15 +1,7 @@
-import {SUPPORTED_PROXY_TYPES, Storage} from "/storage.js";
+import {SUPPORTED_PROXY_TYPES, PROXY_NAMING, Storage} from "/shared.js";
 
 
 const ALARM_NAME = "IconSync"
-
-const PROXY_NAMING = {
-    "none": "Disabled",
-    "autoDetect": "Auto Detect",
-    "system": "System Proxy",
-    "manual": "Manual Configuration",
-    "autoConfig": "Auto Configuration",
-}
 
 /**
  * @param title {string}

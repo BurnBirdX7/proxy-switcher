@@ -1,0 +1,23 @@
+.proxy-type-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.proxy-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.proxy-type-checkbox {
+    cursor: pointer;
+}
+
+label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
