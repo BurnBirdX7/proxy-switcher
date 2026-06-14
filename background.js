@@ -102,6 +102,11 @@ async function cycleProxyTypes(config, iter = 1) {
 }
 
 async function handleClick() {
+    if (!await Storage.getInitialized()) {
+        console.error("Extension is not initialized");
+        return;
+    }
+
     const ready = await browser.extension.isAllowedIncognitoAccess();
     if (!ready) {
         console.warn("Can't update - not enough permissions");
@@ -114,7 +119,11 @@ async function handleClick() {
         .catch(reason => console.error(`Failed to update proxy settings: ${reason}`));
 }
 
-async function init() {
+async function oneTimeInit() {
+    if (await Storage.getInitialized()) {
+        return;
+    }
+
     let incognitoAllowed = await browser.extension.isAllowedIncognitoAccess();
     if (!incognitoAllowed) {
         console.error("Can't init - not enough permissions");
@@ -137,21 +146,17 @@ async function init() {
         return setIndication("Error: Can't control config", "icons/alert.svg");
     }
 
-    // Handle clicks
-    browser.action.onClicked.addListener(handleClick);
-
     // Handle indicator drift
     await browser.alarms.create(ALARM_NAME, {delayInMinutes: 2});
-    browser.alarms.onAlarm.addListener(updateIndicationOnAlarm);
-    browser.tabs.onActivated.addListener(updateIndication);
 
     // Finish
     await updateIndication();
+    await Storage.setInitialized();
     console.log("Init complete");
 }
 
-if (!await Storage.getInitialized()) {
-    await init();
-    await Storage.setInitialized();
-}
+browser.action.onClicked.addListener(handleClick);
+browser.alarms.onAlarm.addListener(updateIndicationOnAlarm);
+browser.tabs.onActivated.addListener(updateIndication);
 
+await oneTimeInit();
