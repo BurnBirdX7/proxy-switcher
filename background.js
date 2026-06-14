@@ -1,9 +1,5 @@
-/**
- * @type {(browser.proxy._ProxyConfigProxyType)[]}
- */
-const SUPPORTED_PROXY_TYPES = [
-    "none", "autoDetect", "system", "manual", "autoConfig"
-]
+import {SUPPORTED_PROXY_TYPES, Storage} from "/storage.js";
+
 
 const ALARM_NAME = "IconSync"
 
@@ -67,6 +63,25 @@ async function updateIndicationOnAlarm(alarm) {
 }
 
 /**
+ * @param type {browser.proxy._ProxyConfigProxyType}
+ * @return {Promise<browser.proxy._ProxyConfigProxyType>}
+ */
+async function getNextType(type) {
+    const enabledTypes = await Storage.getEnabledProxyTypes();
+
+    const startIdx = SUPPORTED_PROXY_TYPES.findIndex(value => value === type);
+    for (let shift = 1; shift < SUPPORTED_PROXY_TYPES.length; shift++) {
+        const candidateIdx = (startIdx + shift) % SUPPORTED_PROXY_TYPES.length;
+        const candidateType = SUPPORTED_PROXY_TYPES[candidateIdx];
+        if (enabledTypes.includes(candidateType)) {
+            return candidateType;
+        }
+    }
+
+    throw new Error("Failed to get next type. None of the types are enabled?");
+}
+
+/**
  * @param config {browser.proxy.ProxyConfig}
  * @param iter {number}
  */
@@ -80,15 +95,14 @@ async function cycleProxyTypes(config, iter = 1) {
         return updateIndication();
     }
 
-    const nextIdx = (idx + 1) % SUPPORTED_PROXY_TYPES.length;
-    const nextType = SUPPORTED_PROXY_TYPES[nextIdx];
+    const nextType = await getNextType(proxyType);
 
     console.debug(`Switching to type ${nextType}`);
 
     config.proxyType = nextType;
     return setProxySettings(config)
         .catch(reason => {
-            console.error(`Failed to update proxy settings: "${reason}"`);
+            console.error(`Failed to update switch to ${nextType} settings: "${reason}"`);
             if (iter < SUPPORTED_PROXY_TYPES.length) {
                 console.warn("Trying next configuration");
                 return cycleProxyTypes(config, iter + 1);
@@ -142,7 +156,6 @@ async function init() {
     await browser.alarms.create(ALARM_NAME, {delayInMinutes: 2});
     browser.alarms.onAlarm.addListener(updateIndicationOnAlarm);
     browser.tabs.onActivated.addListener(updateIndication);
-    browser.tabs.onUpdated.addListener(updateIndication);
 
     // Finish
     await updateIndication();
