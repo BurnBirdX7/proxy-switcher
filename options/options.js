@@ -1,4 +1,4 @@
-import { SUPPORTED_PROXY_TYPES, Storage } from '/shared.js';
+import { SUPPORTED_PROXY_TYPES, PROXY_NAMING, Storage } from '/shared.js';
 
 const CHECKBOX_NAME = 'types-checkbox';
 
@@ -25,7 +25,7 @@ function createLabel(type) {
     img.alt = type;
     img.className = 'proxy-icon';
 
-    const text = document.createTextNode(` ${type}`);
+    const text = document.createTextNode(PROXY_NAMING[type]);
 
     label.appendChild(img);
     label.appendChild(text);
