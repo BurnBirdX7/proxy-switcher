@@ -1,4 +1,4 @@
-import { SUPPORTED_PROXY_TYPES, PROXY_NAMING, Storage } from '/shared.js';
+import {SUPPORTED_PROXY_TYPES, PROXY_NAMING, Storage} from '/shared.js';
 
 const CHECKBOX_NAME = 'types-checkbox';
 
@@ -16,6 +16,10 @@ function createCheckbox(type) {
     return checkbox;
 }
 
+/**
+ * @param type {string}
+ * @returns {HTMLLabelElement}
+ */
 function createLabel(type) {
     const label = document.createElement('label');
     label.htmlFor = `type-${type}`;
@@ -32,17 +36,45 @@ function createLabel(type) {
     return label;
 }
 
+/**
+ * @returns {HTMLInputElement[]}
+ */
+function getCheckboxes() {
+    const nodeList = document.querySelectorAll(`input[type="checkbox"][name="${CHECKBOX_NAME}"]`);
+    return Array.from(nodeList);
+}
+
+/**
+ */
+function disableLastCheckbox() {
+    const optionBoxes = getCheckboxes();
+    const checkedCount = optionBoxes.filter(cb => cb.checked).length;
+
+    if (checkedCount <= 2) {
+        optionBoxes.filter(c => c.checked).forEach(c => c.disabled = true);
+    } else {
+        optionBoxes.forEach(c => c.disabled = false);
+    }
+}
+
+/**
+ * @returns {string[]}
+ */
+function getCheckedBoxes() {
+    const optionBoxes = getCheckboxes();
+    return optionBoxes.filter(cb => cb.checked).map(checkbox => checkbox.value);
+}
+
 async function constructForm() {
     const container = document.getElementById('proxy-types-container');
-    const form = document.getElementById('proxy-form');
 
     // Create checkboxes for each supported proxy type
     SUPPORTED_PROXY_TYPES.forEach(type => {
         const wrapper = document.createElement('div');
         wrapper.className = 'proxy-type-wrapper';
 
-        const checkbox = createCheckbox(type);
         const label = createLabel(type);
+        const checkbox = createCheckbox(type);
 
         wrapper.appendChild(checkbox);
         wrapper.appendChild(label);
@@ -58,12 +90,14 @@ async function constructForm() {
         }
     });
 
+    disableLastCheckbox();
+
     // Handle checkbox changes
     container.addEventListener('change', async (event) => {
         if (event.target.name === CHECKBOX_NAME) {
-            const formData = new FormData(form);
-            const selectedTypes = formData.getAll(CHECKBOX_NAME);
+            const selectedTypes = getCheckedBoxes();
             await Storage.setEnabledProxyTypes(selectedTypes);
+            disableLastCheckbox();
         }
     });
 }
